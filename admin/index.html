@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>UrbanIQ Admin</title>
+<link rel="icon" href="../assets/img/wordmark.png">
+<style>
+:root{--bg:#140b07;--pn:#1f120c;--ln:rgba(255,200,140,.18);--cr:#fbf0de;--mu:#bba88f;--or:#f0601e;--go:#d8ab5a;color-scheme:dark}
+*{box-sizing:border-box;margin:0}body{background:var(--bg);color:var(--cr);font:400 14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
+button,input,select,textarea{font:inherit;color:inherit}
+.btn{background:var(--or);border:0;border-radius:10px;padding:9px 16px;cursor:pointer;font-weight:600;color:#fff}.btn.g{background:transparent;border:1px solid var(--ln);color:var(--cr)}.btn.d{background:#7a2a22}.btn:disabled{opacity:.5}
+input,select,textarea{background:#2a1a12;border:1px solid var(--ln);border-radius:9px;padding:9px 11px;width:100%}input:focus,select:focus,textarea:focus{outline:2px solid var(--or);border-color:transparent}
+#login{min-height:100vh;display:grid;place-items:center;padding:20px}.card{background:var(--pn);border:1px solid var(--ln);border-radius:18px;padding:28px;width:min(380px,100%)}
+.card img{height:34px;display:block;margin:0 auto 22px}.card label{display:block;margin:12px 0 5px;color:var(--mu);font-size:12px;text-transform:uppercase;letter-spacing:.08em}.err{color:#ff9a92;min-height:20px;margin-top:10px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 22px;border-bottom:1px solid var(--ln);position:sticky;top:0;background:rgba(20,11,7,.92);backdrop-filter:blur(8px);z-index:5}
+header img{height:26px}nav{display:flex;gap:6px;flex-wrap:wrap}nav button{background:transparent;border:0;border-radius:9px;padding:8px 14px;color:var(--mu);cursor:pointer}nav button.on{background:var(--pn);color:var(--cr);box-shadow:inset 0 0 0 1px var(--ln)}
+main{padding:22px;max-width:1200px;margin:auto}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:18px}.stat{background:var(--pn);border:1px solid var(--ln);border-radius:14px;padding:14px 16px}.stat b{display:block;font-size:28px;color:var(--or);font-weight:600}.stat span{color:var(--mu);font-size:12px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}.bar input{max-width:280px}.bar select{max-width:170px}.sp{flex:1}
+.tw{overflow-x:auto;border:1px solid var(--ln);border-radius:14px;background:var(--pn)}table{border-collapse:collapse;width:100%;min-width:760px}th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--ln);vertical-align:middle}th{color:var(--mu);font-size:12px;text-transform:uppercase;letter-spacing:.07em}tr:last-child td{border:0}
+td select{padding:6px 8px;width:auto}td input.nt{min-width:150px;padding:6px 9px}.chip{display:inline-block;background:rgba(240,96,30,.18);color:#ffb48a;border-radius:99px;padding:2px 10px;font-size:12px}
+.pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}.pc{background:var(--pn);border:1px solid var(--ln);border-radius:14px;padding:14px}.pc h4{font-size:16px;margin-bottom:2px}.pc small{color:var(--mu);display:block;margin-bottom:10px}.pc select,.pc input{margin-bottom:8px}
+.pn2{background:var(--pn);border:1px solid var(--ln);border-radius:16px;padding:22px;max-width:520px;margin-bottom:18px}.pn2 h3{margin-bottom:12px}.pn2 label{display:block;margin:12px 0 5px;color:var(--mu);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2a1a12;border:1px solid var(--ln);padding:10px 18px;border-radius:12px;display:none;z-index:20}.empty{padding:40px;text-align:center;color:var(--mu)}[hidden]{display:none!important}
+</style></head><body>
+<div id="login"><form class="card" id="lf"><img src="../assets/img/wordmark.png" alt="UrbanIQ"><label for="u">Username</label><input id="u" autocomplete="username" required><label for="p">Password</label><input id="p" type="password" autocomplete="current-password" required><div class="err" id="le"></div><button class="btn" style="width:100%;margin-top:6px">Sign in</button></form></div>
+<div id="app" hidden>
+<header><img src="../assets/img/wordmark.png" alt="UrbanIQ"><nav><button data-t="enq" class="on">Enquiries</button><button data-t="plots">Plots</button><button data-t="set">Settings</button></nav><button class="btn g" id="out">Sign out</button></header>
+<main>
+<section id="t-enq"><div class="stats" id="stats"></div>
+<div class="bar"><input id="q" placeholder="Search name, phone, plot…"><select id="fs"><option value="">All statuses</option><option value="new">New</option><option value="contacted">Contacted</option><option value="visit">Visit booked</option><option value="closed">Closed</option></select><span class="sp"></span><a class="btn g" href="/api/admin/export.csv" id="csv" style="text-decoration:none">Export CSV</a><button class="btn g" id="rf">Refresh</button></div>
+<div class="tw"><table><thead><tr><th>Date</th><th>Name</th><th>Phone</th><th>Plot</th><th>Status</th><th>Note</th><th></th></tr></thead><tbody id="rows"></tbody></table><div class="empty" id="none" hidden>No enquiries yet.</div></div></section>
+<section id="t-plots" hidden><p style="color:var(--mu);margin-bottom:14px">Set availability for each plot. This shows on the public site when a plot is selected.</p><div class="pg" id="pg"></div><p style="margin-top:16px"><button class="btn" id="sp">Save plots</button></p></section>
+<section id="t-set" hidden>
+<div class="pn2"><h3>Contact</h3><label for="ph">Phone number shown on the site</label><input id="ph"><p style="margin-top:14px"><button class="btn" id="sph">Save</button></p></div>
+<div class="pn2"><h3>Change login</h3><label for="cu">Username</label><input id="cu" autocomplete="username"><label for="cp">Current password</label><input id="cp" type="password" autocomplete="current-password"><label for="np">New password (8+ characters)</label><input id="np" type="password" autocomplete="new-password"><p style="margin-top:14px"><button class="btn" id="spw">Update</button></p></div></section>
+</main></div><div class="toast" id="ts"></div>
+<script>
+const $=s=>document.querySelector(s),H={'Content-Type':'application/json'};let D=null,me='';
+const toast=m=>{const t=$('#ts');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',2600)};
+async function api(p,o){const r=await fetch('/api/admin/'+p,Object.assign({credentials:'same-origin',headers:H},o||{}));if(r.status===401){show(false);throw new Error('auth')}const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'Request failed');return j}
+function show(on){$('#login').hidden=on;$('#app').hidden=!on}
+$('#lf').onsubmit=async e=>{e.preventDefault();$('#le').textContent='';try{const r=await fetch('/api/admin/login',{method:'POST',headers:H,body:JSON.stringify({user:$('#u').value,pass:$('#p').value})});const j=await r.json();if(!r.ok)throw new Error(j.error);$('#p').value='';await load()}catch(x){$('#le').textContent=x.message}};
+$('#out').onclick=async()=>{await fetch('/api/admin/logout',{method:'POST',headers:H});show(false)};
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));['enq','plots','set'].forEach(t=>$('#t-'+t).hidden=t!==b.dataset.t)});
+async function load(){try{const m=await api('me');me=m.user;D=await api('data');show(true);$('#cu').value=me;$('#ph').value=D.config.phone||'';draw();plots()}catch(e){if(e.message!=='auth')toast(e.message)}}
+const fmt=s=>new Date(s).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+const ST={new:'New',contacted:'Contacted',visit:'Visit booked',closed:'Closed'};
+function draw(){const E=D.enquiries,q=$('#q').value.toLowerCase(),fs=$('#fs').value;
+ const today=E.filter(e=>Date.now()-new Date(e.at)<864e5).length;
+ $('#stats').innerHTML='';[['Total',E.length],['Last 24h',today],['New',E.filter(e=>e.status==='new').length],['Visits',E.filter(e=>e.status==='visit').length]].forEach(a=>{const d=document.createElement('div');d.className='stat';d.innerHTML='<b></b><span></span>';d.firstChild.textContent=a[1];d.lastChild.textContent=a[0];$('#stats').appendChild(d)});
+ const L=E.filter(e=>(!fs||e.status===fs)&&(!q||(e.name+' '+e.phone+' '+e.plot).toLowerCase().includes(q)));const tb=$('#rows');tb.innerHTML='';$('#none').hidden=!!L.length;
+ L.forEach(e=>{const tr=document.createElement('tr'),td=()=>tr.appendChild(document.createElement('td'));
+  td().textContent=fmt(e.at);td().textContent=e.name;const p=td(),a=document.createElement('a');a.href='tel:'+e.phone.replace(/[^\d+]/g,'');a.textContent=e.phone;a.style.color='var(--go)';p.appendChild(a);
+  const pl=td();if(e.plot){const c=document.createElement('span');c.className='chip';c.textContent='Plot '+e.plot;pl.appendChild(c)}
+  const s=document.createElement('select');Object.keys(ST).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=ST[k];s.appendChild(o)});s.value=e.status;s.onchange=()=>patch(e,{status:s.value});td().appendChild(s);
+  const n=document.createElement('input');n.className='nt';n.value=e.note||'';n.placeholder='Add note';n.maxLength=500;n.onchange=()=>patch(e,{note:n.value});td().appendChild(n);
+  const d=document.createElement('button');d.className='btn d';d.textContent='Delete';d.onclick=async()=>{if(!confirm('Delete this enquiry?'))return;try{await api('enquiries/'+e.id,{method:'DELETE'});D.enquiries=D.enquiries.filter(x=>x!==e);draw();toast('Deleted')}catch(x){toast(x.message)}};td().appendChild(d);tb.appendChild(tr)})}
+async function patch(e,b){try{Object.assign(e,await api('enquiries/'+e.id,{method:'PATCH',body:JSON.stringify(b)}));draw();toast('Saved')}catch(x){toast(x.message)}}
+$('#q').oninput=draw;$('#fs').onchange=draw;$('#rf').onclick=load;
+$('#csv').onclick=e=>{e.preventDefault();location.href='/api/admin/export.csv'};
+function plots(){const g=$('#pg');g.innerHTML='';for(let n=1;n<=12;n++){const p=D.config.plots[n]||{status:'available',note:''},d=document.createElement('div');d.className='pc';
+ d.innerHTML='<h4></h4><small></small><select><option value="available">Available</option><option value="booked">Booked</option><option value="sold">Sold</option></select><input maxlength="120" placeholder="Note (optional)">';
+ d.querySelector('h4').textContent='Plot '+n;d.querySelector('small').textContent=n<=8?'Residential villa plot':'Semi-commercial plot';const s=d.querySelector('select');s.value=p.status;s.dataset.n=n;const i=d.querySelector('input');i.value=p.note||'';i.dataset.n=n;g.appendChild(d)}}
+$('#sp').onclick=async()=>{const pl={};document.querySelectorAll('#pg .pc').forEach((c,i)=>{pl[i+1]={status:c.querySelector('select').value,note:c.querySelector('input').value}});try{const r=await api('config',{method:'PUT',body:JSON.stringify({plots:pl})});D.config=r.config;toast('Plots saved')}catch(x){toast(x.message)}};
+$('#sph').onclick=async()=>{try{const r=await api('config',{method:'PUT',body:JSON.stringify({phone:$('#ph').value})});D.config=r.config;toast('Saved')}catch(x){toast(x.message)}};
+$('#spw').onclick=async()=>{try{await api('password',{method:'POST',body:JSON.stringify({user:$('#cu').value,current:$('#cp').value,next:$('#np').value})});$('#cp').value=$('#np').value='';toast('Updated. Please sign in again.');setTimeout(()=>$('#out').click(),1200)}catch(x){toast(x.message)}};
+load();
+</script></body></html>
